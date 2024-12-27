@@ -4,6 +4,21 @@
 let friendsList = [];
 let totalCollected = 0;
 
+// Load data from localStorage when the page loads
+window.onload = function () {
+    const storedFriends = localStorage.getItem('friendsList');
+    const storedTotal = localStorage.getItem('totalCollected');
+
+    if (storedFriends) {
+        friendsList = JSON.parse(storedFriends);
+    }
+    if (storedTotal) {
+        totalCollected = parseFloat(storedTotal);
+    }
+
+    updateDashboard();
+};
+
 // Add Friend functionality
 document.getElementById('addFriendBtn').addEventListener('click', function () {
     const name = prompt("Enter your friend's name:");
@@ -13,6 +28,9 @@ document.getElementById('addFriendBtn').addEventListener('click', function () {
         // Add the friend's name and amount to the list
         friendsList.push({ name: name, amount: amount });
         totalCollected += amount;
+
+        // Save to localStorage
+        saveData();
 
         // Update the Total Collected display
         updateDashboard();
@@ -40,4 +58,10 @@ document.getElementById('viewSummaryBtn').addEventListener('click', function () 
 // Function to update the dashboard display
 function updateDashboard() {
     document.querySelector('.dashboard h2:nth-child(1)').textContent = `Total Collected: ₹${totalCollected}`;
+}
+
+// Function to save data to localStorage
+function saveData() {
+    localStorage.setItem('friendsList', JSON.stringify(friendsList));
+    localStorage.setItem('totalCollected', totalCollected.toString());
 }
