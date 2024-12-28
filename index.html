@@ -78,12 +78,19 @@
 
         footer {
             text-align: center;
-            padding: 10px;
+            padding: 5px 0; /* Reduced footer height */
             background: #87CEEB;
             color: white;
             position: fixed;
             bottom: 0;
             width: 100%;
+        }
+
+        .total-amount {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #FF8C00;
+            margin-top: 20px;
         }
 
         @media (max-width: 768px) {
@@ -122,6 +129,11 @@
             <h2>View Summary</h2>
             <p>See the total contributions and balance.</p>
             <button class="btn btn-summary">View Summary</button>
+        </div>
+
+        <!-- Total amount collected -->
+        <div class="total-amount">
+            <span>Total Collected: ₹<span id="total-amount">0</span></span>
         </div>
     </div>
 
