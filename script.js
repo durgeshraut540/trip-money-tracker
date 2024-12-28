@@ -8,8 +8,8 @@ const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE
 console.log("Running script.js...");
 
 // DOM Elements
-const addContributorButton = document.querySelector(".btn[href='#']");
-const viewSummaryButton = document.querySelector(".btn[href='#']:nth-of-type(2)");
+const addContributorButton = document.querySelector(".btn-add");
+const viewSummaryButton = document.querySelector(".btn-summary");
 
 // Verify if buttons are found
 if (!addContributorButton || !viewSummaryButton) {
