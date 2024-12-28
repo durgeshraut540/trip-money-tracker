@@ -1,100 +1,84 @@
-// Azure Blob Storage Integration for Storing Contributions
-// This script integrates with Azure Blob Storage to store and retrieve data centrally.
+const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
+const AZURE_CONTAINER_NAME = "tracker";
+const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
+const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
-// Replace with your Azure Storage details
-const AZURE_STORAGE_ACCOUNT = "durgeshpoc";
-const AZURE_CONTAINER_NAME = "trip-tracker";
-const SAS_TOKEN = "sp=racwdl&st=2024-12-28T01:53:05Z&se=2025-03-01T09:53:05Z&sv=2022-11-02&sr=c&sig=qE1%2BTshqV6g%2FX1tBqVOrtQv8iDcfRCfs7jYUvM6ya7Y%3D"; // Generated from Azure Portal
-const BLOB_NAME = "contributions.json";
+let contributors = []; // To hold the list of contributors
 
-// URL for accessing the blob
-const BLOB_URL = `https://durgeshpoc.blob.core.windows.net/trip-tracker`;
-
-// Array to store friends' contributions
-let friendsList = [];
-let totalCollected = 0;
-
-// Load data from Azure Blob Storage when the page loads
-window.onload = async function () {
+// Fetch existing data from Azure Blob Storage
+async function fetchContributors() {
     try {
-        const response = await fetch(BLOB_URL + "?" + SAS_TOKEN);
-        if (response.ok) {
-            const data = await response.json();
-            friendsList = data.friendsList || [];
-            totalCollected = data.totalCollected || 0;
-            updateDashboard();
-        } else {
-            console.error("Failed to fetch data from Azure Blob Storage.", response.statusText);
+        const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
+        if (!response.ok) {
+            throw new Error("Error fetching data from Azure Blob Storage");
         }
+        const data = await response.json();
+        contributors = data || [];
+        renderContributors();
     } catch (error) {
-        console.error("Error fetching data from Azure Blob Storage:", error);
+        console.error("Failed to fetch contributors:", error);
     }
-};
-
-// Add Friend functionality
-document.getElementById('addFriendBtn').addEventListener('click', async function () {
-    const name = prompt("Enter your friend's name:");
-    const amount = parseFloat(prompt("Enter the amount they contributed (₹):"));
-
-    if (name && !isNaN(amount) && amount > 0) {
-        // Add the friend's name and amount to the list
-        friendsList.push({ name: name, amount: amount });
-        totalCollected += amount;
-
-        // Save data to Azure Blob Storage
-        await saveData();
-
-        // Update the Total Collected display
-        updateDashboard();
-
-        alert(`${name} has been added with a contribution of ₹${amount}.`);
-    } else {
-        alert("Invalid input. Please try again.");
-    }
-});
-
-// View Summary functionality
-document.getElementById('viewSummaryBtn').addEventListener('click', function () {
-    if (friendsList.length === 0) {
-        alert("No contributions have been added yet.");
-    } else {
-        let summary = "Summary of Contributions:\n";
-        friendsList.forEach((friend, index) => {
-            summary += `${index + 1}. ${friend.name}: ₹${friend.amount}\n`;
-        });
-        summary += `\nTotal Collected: ₹${totalCollected}`;
-        alert(summary);
-    }
-});
-
-// Function to update the dashboard display
-function updateDashboard() {
-    document.querySelector('.dashboard h2:nth-child(1)').textContent = `Total Collected: ₹${totalCollected}`;
 }
 
-// Function to save data to Azure Blob Storage
-async function saveData() {
-    const blobData = {
-        friendsList: friendsList,
-        totalCollected: totalCollected
-    };
-
+// Save data to Azure Blob Storage
+async function saveContributors() {
     try {
-        const response = await fetch(BLOB_URL + "?" + SAS_TOKEN, {
+        const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
             method: "PUT",
             headers: {
                 "x-ms-blob-type": "BlockBlob",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
-            body: JSON.stringify(blobData)
+            body: JSON.stringify(contributors),
         });
-
-        if (response.ok) {
-            console.log("Data successfully saved to Azure Blob Storage.");
-        } else {
-            console.error("Failed to save data to Azure Blob Storage.", response.statusText);
+        if (!response.ok) {
+            throw new Error("Error saving data to Azure Blob Storage");
         }
     } catch (error) {
-        console.error("Error saving data to Azure Blob Storage:", error);
+        console.error("Failed to save contributors:", error);
     }
 }
+
+// Render contributors on the page
+function renderContributors() {
+    const container = document.querySelector(".container");
+    container.innerHTML = ""; // Clear the container
+    contributors.forEach((contributor, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+            <h2>${contributor.name}</h2>
+            <p>Amount: ₹${contributor.amount}</p>
+            <button class="btn" onclick="removeContributor(${index})">Remove</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Add a new contributor
+function addContributor(name, amount) {
+    contributors.push({ name, amount });
+    saveContributors();
+    renderContributors();
+}
+
+// Remove a contributor
+function removeContributor(index) {
+    contributors.splice(index, 1);
+    saveContributors();
+    renderContributors();
+}
+
+// Handle form submission
+document.querySelector(".btn-add").addEventListener("click", () => {
+    const name = prompt("Enter contributor's name:");
+    const amount = parseFloat(prompt("Enter amount contributed:"));
+    if (name && !isNaN(amount)) {
+        addContributor(name, amount);
+    } else {
+        alert("Please enter valid details.");
+    }
+});
+
+// Initialize the app
+fetchContributors();
