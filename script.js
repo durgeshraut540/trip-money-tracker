@@ -1,27 +1,29 @@
+// Constants for Azure Blob Storage
 const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
 const AZURE_CONTAINER_NAME = "tracker";
 const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
 const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
-let contributors = []; // To hold the list of contributors
+// DOM Elements
+const addContributorButton = document.querySelector(".btn[href='#']:first-child");
+const viewSummaryButton = document.querySelector(".btn[href='#']:nth-child(2)");
 
-// Fetch existing data from Azure Blob Storage
-async function fetchContributors() {
+// Functions to handle storage
+async function fetchData() {
     try {
         const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
         if (!response.ok) {
-            throw new Error("Error fetching data from Azure Blob Storage");
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        contributors = data || [];
-        renderContributors();
+        return data;
     } catch (error) {
-        console.error("Failed to fetch contributors:", error);
+        console.error("Failed to fetch data from Azure Blob Storage.", error);
+        return [];
     }
 }
 
-// Save data to Azure Blob Storage
-async function saveContributors() {
+async function saveData(data) {
     try {
         const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
             method: "PUT",
@@ -29,56 +31,48 @@ async function saveContributors() {
                 "x-ms-blob-type": "BlockBlob",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(contributors),
+            body: JSON.stringify(data),
         });
+
         if (!response.ok) {
-            throw new Error("Error saving data to Azure Blob Storage");
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        console.log("Data saved successfully.");
     } catch (error) {
-        console.error("Failed to save contributors:", error);
+        console.error("Failed to save data to Azure Blob Storage.", error);
     }
 }
 
-// Render contributors on the page
-function renderContributors() {
-    const container = document.querySelector(".container");
-    container.innerHTML = ""; // Clear the container
-    contributors.forEach((contributor, index) => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.innerHTML = `
-            <h2>${contributor.name}</h2>
-            <p>Amount: ₹${contributor.amount}</p>
-            <button class="btn" onclick="removeContributor(${index})">Remove</button>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// Add a new contributor
-function addContributor(name, amount) {
-    contributors.push({ name, amount });
-    saveContributors();
-    renderContributors();
-}
-
-// Remove a contributor
-function removeContributor(index) {
-    contributors.splice(index, 1);
-    saveContributors();
-    renderContributors();
-}
-
-// Handle form submission
-document.querySelector(".btn-add").addEventListener("click", () => {
+// Sample event handlers
+addContributorButton.addEventListener("click", async () => {
     const name = prompt("Enter contributor's name:");
-    const amount = parseFloat(prompt("Enter amount contributed:"));
+    const amount = parseFloat(prompt("Enter contribution amount:"));
+
     if (name && !isNaN(amount)) {
-        addContributor(name, amount);
+        let data = await fetchData();
+        data.push({ name, amount });
+        await saveData(data);
+        alert("Contributor added successfully!");
     } else {
-        alert("Please enter valid details.");
+        alert("Invalid input. Please try again.");
     }
 });
 
-// Initialize the app
-fetchContributors();
+viewSummaryButton.addEventListener("click", async () => {
+    const data = await fetchData();
+    if (data.length === 0) {
+        alert("No contributions found.");
+        return;
+    }
+
+    const summary = data.map(contributor => `${contributor.name}: ₹${contributor.amount}`).join("\n");
+    const total = data.reduce((sum, contributor) => sum + contributor.amount, 0);
+    alert(`Contributions:\n\n${summary}\n\nTotal: ₹${total}`);
+});
+
+// Load data on startup (Optional, for debugging or initialization)
+window.onload = async () => {
+    console.log("Fetching initial data...");
+    const data = await fetchData();
+    console.log("Initial data:", data);
+};
