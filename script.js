@@ -10,6 +10,7 @@ console.log("Running script.js...");
 // DOM Elements
 const addContributorButton = document.querySelector(".btn-add");
 const viewSummaryButton = document.querySelector(".btn-summary");
+const totalAmountElement = document.getElementById("total-amount");
 
 // Verify if buttons are found
 if (!addContributorButton || !viewSummaryButton) {
@@ -51,6 +52,13 @@ async function saveData(data) {
     }
 }
 
+// Function to update the total amount collected on the dashboard
+async function updateTotalAmount() {
+    const data = await fetchData();
+    const totalAmount = data.reduce((sum, contributor) => sum + contributor.amount, 0);
+    totalAmountElement.textContent = totalAmount.toFixed(2); // Format to 2 decimal places
+}
+
 // Sample event handlers
 if (addContributorButton) {
     addContributorButton.addEventListener("click", async () => {
@@ -62,6 +70,9 @@ if (addContributorButton) {
             data.push({ name, amount });
             await saveData(data);
             alert("Contributor added successfully!");
+
+            // Update total amount after adding contributor
+            await updateTotalAmount();
         } else {
             alert("Invalid input. Please try again.");
         }
@@ -85,6 +96,7 @@ if (viewSummaryButton) {
 // Load data on startup (Optional, for debugging or initialization)
 window.onload = async () => {
     console.log("Fetching initial data...");
+    await updateTotalAmount(); // Update total amount on page load
     const data = await fetchData();
     console.log("Initial data:", data);
 };
