@@ -10,7 +10,6 @@ console.log("Running script.js...");
 // DOM Elements
 const addContributorButton = document.querySelector(".btn-add");
 const viewSummaryButton = document.querySelector(".btn-summary");
-const totalAmountElement = document.getElementById("total-amount");
 
 // Verify if buttons are found
 if (!addContributorButton || !viewSummaryButton) {
@@ -52,14 +51,7 @@ async function saveData(data) {
     }
 }
 
-// Function to update the total amount collected on the dashboard
-async function updateTotalAmount() {
-    const data = await fetchData();
-    const totalAmount = data.reduce((sum, contributor) => sum + contributor.amount, 0);
-    totalAmountElement.textContent = totalAmount.toFixed(2); // Format to 2 decimal places
-}
-
-// Sample event handlers
+// Add Contributor (with data update logic)
 if (addContributorButton) {
     addContributorButton.addEventListener("click", async () => {
         const name = prompt("Enter contributor's name:");
@@ -67,18 +59,26 @@ if (addContributorButton) {
 
         if (name && !isNaN(amount)) {
             let data = await fetchData();
-            data.push({ name, amount });
+            
+            // Check if contributor already exists
+            const existingContributor = data.find(contributor => contributor.name === name);
+            if (existingContributor) {
+                // If found, update the existing contributor's amount
+                existingContributor.amount += amount;
+                alert(`${name}'s contribution updated!`);
+            } else {
+                // If not found, add a new contributor
+                data.push({ name, amount });
+                alert(`New contributor ${name} added!`);
+            }
             await saveData(data);
-            alert("Contributor added successfully!");
-
-            // Update total amount after adding contributor
-            await updateTotalAmount();
         } else {
             alert("Invalid input. Please try again.");
         }
     });
 }
 
+// View Summary and Delete Contributor
 if (viewSummaryButton) {
     viewSummaryButton.addEventListener("click", async () => {
         const data = await fetchData();
@@ -87,16 +87,38 @@ if (viewSummaryButton) {
             return;
         }
 
-        const summary = data.map(contributor => `${contributor.name}: ₹${contributor.amount}`).join("\n");
+        let summary = data.map((contributor, index) => {
+            return `${contributor.name}: ₹${contributor.amount} <button class="btn-delete" data-index="${index}">Delete</button>`;
+        }).join("\n");
+
         const total = data.reduce((sum, contributor) => sum + contributor.amount, 0);
-        alert(`Contributions:\n\n${summary}\n\nTotal: ₹${total}`);
+        summary += `\n\nTotal: ₹${total}`;
+
+        // Show the summary with the delete buttons
+        alert(summary);
+
+        // Add event listeners to delete buttons
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const index = event.target.getAttribute('data-index');
+                let data = await fetchData();
+                
+                // Remove the contributor
+                data.splice(index, 1);
+                await saveData(data);
+                alert("Contributor deleted successfully!");
+
+                // Reload the summary after deletion
+                viewSummaryButton.click();
+            });
+        });
     });
 }
 
 // Load data on startup (Optional, for debugging or initialization)
 window.onload = async () => {
     console.log("Fetching initial data...");
-    await updateTotalAmount(); // Update total amount on page load
     const data = await fetchData();
     console.log("Initial data:", data);
 };
