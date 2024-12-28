@@ -4,7 +4,7 @@
 // Replace with your Azure Storage details
 const AZURE_STORAGE_ACCOUNT = "durgeshpoc";
 const AZURE_CONTAINER_NAME = "trip-tracker";
-const SAS_TOKEN = "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2025-02-08T09:21:45Z&st=2024-12-28T01:21:45Z&spr=https,http&sig=0TxCN0%2BEDnGam8xPSW13mnfK1H8XczqkMwojKQ0JCvM%3D"; // Generated from Azure Portal
+const SAS_TOKEN = "sp=racwdli&st=2024-12-28T01:39:10Z&se=2025-03-01T09:39:10Z&sv=2022-11-02&sr=c&sig=9XTnRzGAn6p3EFZXlOyqd8bOequaATXI1Y%2F3nLnyPy0%3D"; // Generated from Azure Portal
 const BLOB_NAME = "contributions.json";
 
 // URL for accessing the blob
