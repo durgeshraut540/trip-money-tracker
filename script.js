@@ -8,7 +8,7 @@ const SAS_TOKEN = "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2025-02-08T
 const BLOB_NAME = "contributions.json";
 
 // URL for accessing the blob
-const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${BLOB_NAME}`;
+const BLOB_URL = `https://durgeshpoc.blob.core.windows.net/trip-tracker`;
 
 // Array to store friends' contributions
 let friendsList = [];
