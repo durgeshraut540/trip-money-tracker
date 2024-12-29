@@ -85,64 +85,40 @@
         const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
         async function fetchData() {
-            try {
-                const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error("Failed to fetch data from Azure Blob Storage.", error);
-                return [];
-            }
+            const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
+            return response.ok ? response.json() : [];
         }
 
         async function saveData(data) {
-            try {
-                const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
-                    method: "PUT",
-                    headers: {
-                        "x-ms-blob-type": "BlockBlob",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                console.log("Data saved successfully.");
-            } catch (error) {
-                console.error("Failed to save data to Azure Blob Storage.", error);
-            }
-        }
-
-        async function renderContributors() {
-            const contributorsTable = document.getElementById("contributors-table");
-            const data = await fetchData();
-
-            // Clear the table before adding rows
-            contributorsTable.innerHTML = "";
-
-            // Add rows dynamically
-            data.forEach((contributor, index) => {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-                    <td>${contributor.name}</td>
-                    <td>₹${contributor.amount}</td>
-                    <td><button class="btn-delete" data-index="${index}">Delete</button></td>
-                `;
-
-                // Append row to the table
-                contributorsTable.appendChild(row);
-
-                // Add click event listener to delete button
-                const deleteButton = row.querySelector(".btn-delete");
-                deleteButton.addEventListener("click", async () => {
-                    data.splice(index, 1); // Remove the contributor from data
-                    await saveData(data); // Save updated data to Azure Blob Storage
-                    renderContributors(); // Re-render the table
-                });
+            await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "x-ms-blob-type": "BlockBlob" },
+                body: JSON.stringify(data),
             });
         }
 
-        // Initialize the page
+        async function renderContributors() {
+            const table = document.getElementById("contributors-table");
+            const data = await fetchData();
+            table.innerHTML = data
+                .map((contributor, index) => `
+                    <tr>
+                        <td>${contributor.name}</td>
+                        <td>₹${contributor.amount}</td>
+                        <td><button class="btn-delete" data-index="${index}">Delete</button></td>
+                    </tr>
+                `)
+                .join("");
+            document.querySelectorAll(".btn-delete").forEach((button) =>
+                button.addEventListener("click", async () => {
+                    const index = button.getAttribute("data-index");
+                    data.splice(index, 1);
+                    await saveData(data);
+                    renderContributors();
+                })
+            );
+        }
+
         renderContributors();
     </script>
 </body>
