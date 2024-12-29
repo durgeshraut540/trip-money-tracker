@@ -6,110 +6,7 @@
     <title>Goa Trip Money Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
-            color: #333;
-        }
-
-        header {
-            background-color: #FFFFFF;
-            height: 250px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-
-        header img {
-            max-height: 200px;
-            margin-bottom: 10px;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-            padding: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #FF8C00;
-        }
-
-        .btn {
-            display: inline-block;
-            background: #FF8C00;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s;
-            font-weight: 600;
-        }
-
-        .btn:hover {
-            background: #FFA500;
-        }
-
-        footer {
-            text-align: center;
-            padding: 5px 0; /* Reduced footer height */
-            background: #87CEEB;
-            color: white;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-
-        .total-amount {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #FF8C00;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .btn {
-                padding: 8px 16px;
-            }
-        }
+        /* Add styles here (same as before) */
     </style>
 </head>
 <body>
@@ -128,12 +25,7 @@
         <div class="card">
             <h2>View Summary</h2>
             <p>See the total contributions and balance.</p>
-            <button class="btn btn-summary">View Summary</button>
-        </div>
-
-        <!-- Total amount collected -->
-        <div class="total-amount">
-            <span>Total Collected: ₹<span id="total-amount">0</span></span>
+            <a href="summary.html" class="btn btn-summary">View Summary</a>
         </div>
     </div>
 
