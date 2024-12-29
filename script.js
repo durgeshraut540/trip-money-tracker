@@ -14,10 +14,13 @@ async function fetchData() {
     try {
         const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        return await response.json();
+
+        const data = await response.json();
+        // Ensure the data is an array
+        return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error("Error fetching data:", error);
-        return [];
+        return []; // Fallback to an empty array
     }
 }
 
@@ -32,6 +35,7 @@ async function saveData(data) {
             },
             body: JSON.stringify(data),
         });
+
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         console.log("Data saved successfully.");
     } catch (error) {
@@ -41,29 +45,42 @@ async function saveData(data) {
 
 // Update Total Amount
 async function updateTotalAmount() {
-    const data = await fetchData();
-    const total = data.reduce((sum, contributor) => sum + contributor.amount, 0);
-    totalAmountElement.textContent = `Total Amount Collected: ₹${total}`;
+    try {
+        const data = await fetchData();
+        const total = data.reduce((sum, contributor) => sum + (contributor.amount || 0), 0); // Safeguard with `|| 0`
+        totalAmountElement.textContent = `Total Amount Collected: ₹${total}`;
+    } catch (error) {
+        console.error("Error updating total amount:", error);
+        totalAmountElement.textContent = "Error calculating total amount.";
+    }
 }
 
 // Add Contributor
 addContributorButton.addEventListener("click", async () => {
-    const name = prompt("Enter contributor's name:");
-    const amount = parseFloat(prompt("Enter contribution amount:"));
+    try {
+        const name = prompt("Enter contributor's name:");
+        const amount = parseFloat(prompt("Enter contribution amount:"));
 
-    if (name && !isNaN(amount)) {
+        if (!name || isNaN(amount)) {
+            alert("Invalid input. Please try again.");
+            return;
+        }
+
         const data = await fetchData();
         const existingContributor = data.find((contributor) => contributor.name === name);
+
         if (existingContributor) {
-            existingContributor.amount += amount;
+            existingContributor.amount += amount; // Update amount if contributor exists
         } else {
-            data.push({ name, amount });
+            data.push({ name, amount }); // Add new contributor
         }
+
         await saveData(data);
         await updateTotalAmount();
         alert("Contributor added successfully!");
-    } else {
-        alert("Invalid input. Please try again.");
+    } catch (error) {
+        console.error("Error adding contributor:", error);
+        alert("An error occurred. Please try again.");
     }
 });
 
