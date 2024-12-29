@@ -1,4 +1,3 @@
-// Constants for Azure Blob Storage
 const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
 const AZURE_CONTAINER_NAME = "tracker";
 const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
@@ -15,10 +14,13 @@ async function fetchData() {
         const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
-        return Array.isArray(data) ? data : { contributors: [], expenses: [] }; // Ensure default structure
+        return {
+            contributors: data.contributors || [],
+            expenses: data.expenses || [],
+        };
     } catch (error) {
         console.error("Error fetching data:", error);
-        return { contributors: [], expenses: [] }; // Fallback to empty structure
+        return { contributors: [], expenses: [] };
     }
 }
 
