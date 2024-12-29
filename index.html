@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goa Trip Money Tracker</title>
+    <title>Goa Trip Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -124,17 +124,13 @@
         <div class="card">
             <h2>Add Contributor</h2>
             <p>Track who has contributed and how much.</p>
-            <form id="contributor-form">
-                <input type="text" id="name" placeholder="Contributor Name" required>
-                <input type="number" id="amount" placeholder="Amount (₹)" required>
-                <button type="submit" class="btn">Add</button>
-            </form>
+            <button id="add-contributor" class="btn">Add Contributor</button>
         </div>
 
         <div class="card">
             <h2>View Summary</h2>
-            <p>See the total contributions and expenses.</p>
-            <button class="btn btn-summary">View Summary</button>
+            <p>See the total contributions and expenses. Delete any contributor if required.</p>
+            <button id="view-summary" class="btn">View Summary</button>
         </div>
     </div>
 
