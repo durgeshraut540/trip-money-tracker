@@ -4,65 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-        header {
-            background-color: #87CEEB;
-            padding: 20px;
-            text-align: center;
-            color: white;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        .btn-add {
-            background-color: #6a1b9a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+        /* Your CSS styling here */
     </style>
 </head>
 <body>
     <header>
         <h1>Summary</h1>
     </header>
-    <div class="container">
+    <div id="content">
         <h2>Contributors</h2>
-        <table>
+        <table id="contributors-table">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Amount</th>
                 </tr>
             </thead>
-            <tbody id="contributors-table"></tbody>
+            <tbody></tbody>
         </table>
         <h2>Expenses</h2>
-        <table>
+        <table id="expenses-table">
             <thead>
                 <tr>
                     <th>Expense Name</th>
@@ -71,60 +33,36 @@
                     <th>Comments</th>
                 </tr>
             </thead>
-            <tbody id="expenses-table"></tbody>
+            <tbody></tbody>
         </table>
-        <button class="btn-add" id="add-expense">Add Expense</button>
     </div>
     <script>
-        const contributorsTable = document.getElementById("contributors-table");
-        const expensesTable = document.getElementById("expenses-table");
-        const addExpenseButton = document.getElementById("add-expense");
+        const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
+        const AZURE_CONTAINER_NAME = "tracker";
+        const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
+        const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
-        // Fetch Data and Render Tables
+        const contributorsTable = document.querySelector("#contributors-table tbody");
+        const expensesTable = document.querySelector("#expenses-table tbody");
+
         async function fetchAndRender() {
             try {
-                const data = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-                const parsedData = await data.json();
+                const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
+                const data = await response.json();
 
                 // Render contributors
-                contributorsTable.innerHTML = parsedData.contributors.map(
+                contributorsTable.innerHTML = data.contributors.map(
                     (c) => `<tr><td>${c.name}</td><td>${c.amount}</td></tr>`
                 ).join("");
 
                 // Render expenses
-                expensesTable.innerHTML = parsedData.expenses.map(
+                expensesTable.innerHTML = data.expenses.map(
                     (e) => `<tr><td>${e.name}</td><td>${e.amount}</td><td>${e.paidBy}</td><td>${e.comments}</td></tr>`
                 ).join("");
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-
-        addExpenseButton.addEventListener("click", async () => {
-            const name = prompt("Enter expense name:");
-            const amount = parseFloat(prompt("Enter amount:"));
-            const paidBy = prompt("Who paid?");
-            const comments = prompt("Any comments?");
-
-            if (!name || isNaN(amount) || !paidBy) {
-                alert("Invalid input.");
-                return;
-            }
-
-            const data = await fetch(`${BLOB_URL}?${SAS_TOKEN}`).then((res) => res.json());
-            data.expenses.push({ name, amount, paidBy, comments });
-
-            await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            alert("Expense added!");
-            await fetchAndRender();
-        });
 
         // Initialize
         fetchAndRender();
