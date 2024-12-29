@@ -116,7 +116,7 @@
             <input type="number" id="expense-amount" placeholder="Amount (₹)" required>
             <input type="text" id="paid-by" placeholder="Paid By" required>
             <textarea id="comments" placeholder="Comments" rows="2"></textarea>
-            <button class="btn-add-expense">Add Expense</button>
+            <button class="btn-add-expense" id="add-expense-button">Add Expense</button>
         </div>
 
         <table>
@@ -206,7 +206,7 @@
             });
         }
 
-        document.querySelector(".btn-add-expense").addEventListener("click", async () => {
+        document.getElementById("add-expense-button").addEventListener("click", async () => {
             const name = document.getElementById("expense-name").value.trim();
             const amount = document.getElementById("expense-amount").value.trim();
             const paidBy = document.getElementById("paid-by").value.trim();
