@@ -30,10 +30,17 @@
         }
 
         header h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 600;
             margin: 0;
+        }
+
+        #total-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 20px;
             color: #FF8C00;
+            text-align: center;
         }
 
         .container {
@@ -48,7 +55,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin: 20px 0;
             padding: 20px;
-            text-align: center;
             transition: transform 0.3s ease;
         }
 
@@ -57,7 +63,7 @@
         }
 
         .card h2 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             margin-bottom: 10px;
             color: #FF8C00;
         }
@@ -72,21 +78,10 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             transition: background 0.3s;
             font-weight: 600;
-            font-size: 1rem;
         }
 
         .btn:hover {
             background: #FFA500;
-        }
-
-        .summary-box {
-            background: #FFFAF0;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         footer {
@@ -94,10 +89,27 @@
             padding: 5px;
             background: #87CEEB;
             color: white;
-            font-size: 0.9rem;
             position: fixed;
             bottom: 0;
             width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -105,26 +117,20 @@
     <header>
         <img src="https://i.imgur.com/BfaWeFG.png" alt="Goa Trip Logo">
         <h1>Welcome to the Goa Trip Tracker</h1>
+        <div id="total-amount">Total Amount Collected: ₹0</div>
     </header>
 
     <div class="container">
-        <!-- Summary Box -->
-        <div class="summary-box">
-            <p>Total Contributions Collected: ₹<span id="total-amount">0</span></p>
-        </div>
-
-        <!-- Add Contributor Card -->
         <div class="card">
             <h2>Add Contributor</h2>
             <p>Track who has contributed and how much.</p>
             <button class="btn btn-add">Add Contributor</button>
         </div>
 
-        <!-- View Summary Card -->
         <div class="card">
             <h2>View Summary</h2>
-            <p>See the total contributions and balance.</p>
-            <a href="summary.html" class="btn btn-summary">View Summary</a>
+            <p>See the total contributions and balance. Delete any contributor if required.</p>
+            <button class="btn btn-summary">View Summary</button>
         </div>
     </div>
 
@@ -132,19 +138,6 @@
         <p>&copy; 2024 Goa Trip Tracker. All rights reserved.</p>
     </footer>
 
-    <script>
-        // Update the total amount in the summary box
-        async function updateTotalAmount() {
-            const response = await fetch(
-                `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json?${SAS_TOKEN}`
-            );
-            const data = await response.json();
-            const total = data.reduce((sum, contributor) => sum + contributor.amount, 0);
-            document.getElementById('total-amount').textContent = total.toFixed(2);
-        }
-
-        // Initialize the total amount on page load
-        window.onload = updateTotalAmount;
-    </script>
+    <script src="script.js" defer></script>
 </body>
 </html>
