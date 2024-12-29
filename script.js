@@ -1,76 +1,76 @@
+// Azure Blob Storage Configuration
 const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
 const AZURE_CONTAINER_NAME = "tracker";
 const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
 const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
-document.addEventListener("DOMContentLoaded", () => {
-    const contributorForm = document.querySelector("#contributor-form");
-    const contributorsList = document.querySelector("#contributors-list");
+// Elements
+const addContributorButton = document.getElementById("add-contributor");
+const viewSummaryButton = document.getElementById("view-summary");
+const totalAmountElement = document.getElementById("total-amount");
 
-    if (!contributorForm || !contributorsList) {
-        console.error("Required elements not found in the DOM.");
-        return;
+// Fetch Data from Azure Blob
+async function fetchData() {
+    try {
+        const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        return [];
     }
+}
 
-    async function fetchData() {
-        try {
-            const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-            if (!response.ok) throw new Error("Failed to fetch data");
-            const data = await response.json();
-            return { contributors: data.contributors || [], expenses: data.expenses || [] };
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            return { contributors: [], expenses: [] };
-        }
+// Save Data to Azure Blob
+async function saveData(data) {
+    try {
+        const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
+            method: "PUT",
+            headers: {
+                "x-ms-blob-type": "BlockBlob",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        console.log("Data saved successfully.");
+    } catch (error) {
+        console.error("Error saving data:", error);
     }
+}
 
-    async function saveData(data) {
-        try {
-            const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`, {
-                method: "PUT",
-                headers: { "x-ms-blob-type": "BlockBlob", "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error("Failed to save data");
-        } catch (error) {
-            console.error("Error saving data:", error);
-        }
-    }
+// Update Total Amount
+async function updateTotalAmount() {
+    const data = await fetchData();
+    const total = data.reduce((sum, contributor) => sum + contributor.amount, 0);
+    totalAmountElement.textContent = `Total Amount Collected: ₹${total}`;
+}
 
-    async function renderContributors() {
-        const { contributors } = await fetchData();
-        contributorsList.innerHTML = contributors
-            .map((c, i) => `<li>${c.name} - ₹${c.amount} <button onclick="deleteContributor(${i})">Delete</button></li>`)
-            .join("");
-    }
+// Add Contributor
+addContributorButton.addEventListener("click", async () => {
+    const name = prompt("Enter contributor's name:");
+    const amount = parseFloat(prompt("Enter contribution amount:"));
 
-    async function addContributor(name, amount) {
+    if (name && !isNaN(amount)) {
         const data = await fetchData();
-        data.contributors.push({ name, amount });
-        await saveData(data);
-        await renderContributors();
-    }
-
-    async function deleteContributor(index) {
-        const data = await fetchData();
-        data.contributors.splice(index, 1);
-        await saveData(data);
-        await renderContributors();
-    }
-
-    contributorForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const name = document.querySelector("#name").value.trim();
-        const amount = parseFloat(document.querySelector("#amount").value);
-        if (!name || isNaN(amount)) {
-            alert("Please enter valid details.");
-            return;
+        const existingContributor = data.find((contributor) => contributor.name === name);
+        if (existingContributor) {
+            existingContributor.amount += amount;
+        } else {
+            data.push({ name, amount });
         }
-
-        await addContributor(name, amount);
-        contributorForm.reset();
-    });
-
-    // Initial render
-    renderContributors();
+        await saveData(data);
+        await updateTotalAmount();
+        alert("Contributor added successfully!");
+    } else {
+        alert("Invalid input. Please try again.");
+    }
 });
+
+// View Summary
+viewSummaryButton.addEventListener("click", () => {
+    window.location.href = "summary.html";
+});
+
+// Initialize
+window.onload = updateTotalAmount;
