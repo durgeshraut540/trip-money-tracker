@@ -56,14 +56,44 @@
         .btn-delete:hover {
             background: #FF0000;
         }
+
+        .btn-add-expense {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .btn-add-expense:hover {
+            background: #45a049;
+        }
+
+        .expense-form {
+            margin-bottom: 20px;
+        }
+
+        .expense-form input, .expense-form textarea {
+            padding: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .expense-form button {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Contributors Summary</h1>
+        <h1>Summary Page</h1>
     </header>
 
     <div class="container">
+        <!-- Contributors Table -->
+        <h2>Contributors Summary</h2>
         <table>
             <thead>
                 <tr>
@@ -73,6 +103,33 @@
                 </tr>
             </thead>
             <tbody id="contributors-table">
+                <!-- Rows will be dynamically generated here -->
+            </tbody>
+        </table>
+
+        <!-- Expense Table -->
+        <h2>Expense Sheet</h2>
+
+        <!-- Add Expense Form -->
+        <div class="expense-form">
+            <input type="text" id="expense-name" placeholder="Expense Name" required>
+            <input type="number" id="expense-amount" placeholder="Amount (₹)" required>
+            <input type="text" id="paid-by" placeholder="Paid By" required>
+            <textarea id="comments" placeholder="Comments" rows="2"></textarea>
+            <button class="btn-add-expense">Add Expense</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Expense Name</th>
+                    <th>Rs</th>
+                    <th>Paid By</th>
+                    <th>Comments</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expense-table">
                 <!-- Rows will be dynamically generated here -->
             </tbody>
         </table>
@@ -86,7 +143,7 @@
 
         async function fetchData() {
             const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-            return response.ok ? response.json() : [];
+            return response.ok ? response.json() : { contributors: [], expenses: [] };
         }
 
         async function saveData(data) {
@@ -100,26 +157,82 @@
         async function renderContributors() {
             const table = document.getElementById("contributors-table");
             const data = await fetchData();
-            table.innerHTML = data
+            table.innerHTML = data.contributors
                 .map((contributor, index) => `
                     <tr>
                         <td>${contributor.name}</td>
                         <td>₹${contributor.amount}</td>
-                        <td><button class="btn-delete" data-index="${index}">Delete</button></td>
+                        <td><button class="btn-delete" data-index="${index}" data-type="contributor">Delete</button></td>
                     </tr>
                 `)
                 .join("");
-            document.querySelectorAll(".btn-delete").forEach((button) =>
-                button.addEventListener("click", async () => {
-                    const index = button.getAttribute("data-index");
-                    data.splice(index, 1);
-                    await saveData(data);
-                    renderContributors();
-                })
-            );
+            setupDeleteButtons();
         }
 
+        async function renderExpenses() {
+            const table = document.getElementById("expense-table");
+            const data = await fetchData();
+            table.innerHTML = data.expenses
+                .map((expense, index) => `
+                    <tr>
+                        <td>${expense.name}</td>
+                        <td>₹${expense.amount}</td>
+                        <td>${expense.paidBy}</td>
+                        <td>${expense.comments}</td>
+                        <td><button class="btn-delete" data-index="${index}" data-type="expense">Delete</button></td>
+                    </tr>
+                `)
+                .join("");
+            setupDeleteButtons();
+        }
+
+        function setupDeleteButtons() {
+            document.querySelectorAll(".btn-delete").forEach((button) => {
+                button.addEventListener("click", async (event) => {
+                    const index = button.getAttribute("data-index");
+                    const type = button.getAttribute("data-type");
+                    const data = await fetchData();
+
+                    if (type === "contributor") {
+                        data.contributors.splice(index, 1);
+                    } else if (type === "expense") {
+                        data.expenses.splice(index, 1);
+                    }
+
+                    await saveData(data);
+                    renderContributors();
+                    renderExpenses();
+                });
+            });
+        }
+
+        document.querySelector(".btn-add-expense").addEventListener("click", async () => {
+            const name = document.getElementById("expense-name").value.trim();
+            const amount = document.getElementById("expense-amount").value.trim();
+            const paidBy = document.getElementById("paid-by").value.trim();
+            const comments = document.getElementById("comments").value.trim();
+
+            if (!name || !amount || !paidBy) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            const data = await fetchData();
+            data.expenses.push({ name, amount: parseFloat(amount), paidBy, comments });
+
+            await saveData(data);
+            renderExpenses();
+
+            // Clear the form
+            document.getElementById("expense-name").value = "";
+            document.getElementById("expense-amount").value = "";
+            document.getElementById("paid-by").value = "";
+            document.getElementById("comments").value = "";
+        });
+
+        // Initial rendering
         renderContributors();
+        renderExpenses();
     </script>
 </body>
 </html>
