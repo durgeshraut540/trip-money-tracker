@@ -3,140 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goa Trip Money Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <title>Contributor Tracker</title>
     <style>
         body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
-            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-
-        header {
-            background-color: #FFFFFF;
-            height: 250px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
+        form {
+            margin-bottom: 20px;
         }
-
-        header img {
-            max-height: 150px;
-            margin-bottom: 10px;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        #total-amount {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #FF8C00;
-            text-align: center;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-            padding: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #FF8C00;
-        }
-
-        .btn {
-            display: inline-block;
-            background: #FF8C00;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s;
-            font-weight: 600;
-        }
-
-        .btn:hover {
-            background: #FFA500;
-        }
-
-        footer {
-            text-align: center;
+        input {
+            margin-right: 10px;
             padding: 5px;
-            background: #87CEEB;
-            color: white;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
         }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .btn {
-                padding: 8px 16px;
-            }
+        button {
+            padding: 5px 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <img src="https://i.imgur.com/BfaWeFG.png" alt="Goa Trip Logo">
-        <h1>Welcome to the Goa Trip Tracker</h1>
-        <div id="total-amount">Total Amount Collected: ₹0</div>
-    </header>
+    <h1>Add Contributor</h1>
+    <form id="contributor-form">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="number" id="amount" placeholder="Amount (₹)" required>
+        <button type="submit">Add Contributor</button>
+    </form>
 
-    <div class="container">
-        <div class="card">
-            <h2>Add Contributor</h2>
-            <p>Track who has contributed and how much.</p>
-            <button class="btn btn-add">Add Contributor</button>
-        </div>
-
-        <div class="card">
-            <h2>View Summary</h2>
-            <p>See the total contributions and balance. Delete any contributor if required.</p>
-            <a href="summary.html" class="btn btn-summary">View Summary</a>
-        </div>
-    </div>
-
-    <footer>
-        <p>From 23rd Feb 2025 to 28th Feb 2025.</p>
-    </footer>
+    <h2>Contributors</h2>
+    <ul id="contributors-list"></ul>
 
     <script src="script.js" defer></script>
 </body>
