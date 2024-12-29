@@ -4,11 +4,20 @@ const AZURE_CONTAINER_NAME = "tracker";
 const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
 const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
+// Debugging Tip: Verify DOM Elements Exist
+console.log("Running script.js...");
+
+// DOM Elements
+const addContributorButton = document.querySelector(".btn-add");
+const viewSummaryButton = document.querySelector(".btn-summary");
+
 // Functions to handle storage
 async function fetchData() {
     try {
         const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         return data;
     } catch (error) {
@@ -28,59 +37,46 @@ async function saveData(data) {
             body: JSON.stringify(data),
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         console.log("Data saved successfully.");
     } catch (error) {
         console.error("Failed to save data to Azure Blob Storage.", error);
     }
 }
 
-// Add Contributor
-document.querySelector(".btn-add")?.addEventListener("click", async () => {
-    const name = prompt("Enter contributor's name:");
-    const amount = parseFloat(prompt("Enter contribution amount:"));
+// Add Contributor Handler
+if (addContributorButton) {
+    addContributorButton.addEventListener("click", async () => {
+        console.log("Add Contributor button clicked.");
+        const name = prompt("Enter contributor's name:");
+        const amount = parseFloat(prompt("Enter contribution amount:"));
 
-    if (name && !isNaN(amount)) {
-        let data = await fetchData();
-        const existingContributor = data.find(contributor => contributor.name === name);
+        if (name && !isNaN(amount)) {
+            let data = await fetchData();
 
-        if (existingContributor) {
-            existingContributor.amount += amount;
-            alert(`${name}'s contribution updated!`);
+            // Check if the name already exists
+            const existingContributor = data.find((contributor) => contributor.name === name);
+            if (existingContributor) {
+                existingContributor.amount += amount; // Update amount if contributor exists
+            } else {
+                data.push({ name, amount }); // Add new contributor
+            }
+
+            await saveData(data);
+            alert("Contributor added successfully!");
         } else {
-            data.push({ name, amount });
-            alert(`New contributor ${name} added!`);
+            alert("Invalid input. Please try again.");
         }
-        await saveData(data);
-    } else {
-        alert("Invalid input. Please try again.");
-    }
-});
-
-// Load Summary Page Data
-if (window.location.pathname.includes("summary.html")) {
-    window.onload = async () => {
-        const data = await fetchData();
-        const tableBody = document.getElementById("contributors-table");
-
-        tableBody.innerHTML = data.map((contributor, index) => `
-            <tr>
-                <td>${contributor.name}</td>
-                <td>₹${contributor.amount}</td>
-                <td>
-                    <button class="btn-delete" data-index="${index}">Delete</button>
-                </td>
-            </tr>
-        `).join("");
-
-        // Attach delete event listeners
-        document.querySelectorAll(".btn-delete").forEach(button => {
-            button.addEventListener("click", async (e) => {
-                const index = e.target.getAttribute("data-index");
-                data.splice(index, 1);
-                await saveData(data);
-                window.location.reload(); // Reload page to refresh table
-            });
-        });
-    };
+    });
+} else {
+    console.error("Add Contributor button not found in the DOM.");
 }
+
+// Load data on startup (Optional, for debugging or initialization)
+window.onload = async () => {
+    console.log("Fetching initial data...");
+    const data = await fetchData();
+    console.log("Initial data:", data);
+};
