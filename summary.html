@@ -6,130 +6,127 @@
     <title>Summary</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
+
         table, th, td {
             border: 1px solid #ddd;
         }
+
         th, td {
-            padding: 8px;
+            padding: 10px;
             text-align: left;
         }
+
         th {
-            background-color: #f4f4f4;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .add-expense-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-expense-form input, .add-expense-form button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .add-expense-form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .add-expense-form button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Summary Page</h1>
-    </header>
-    <section>
-        <h2>Contributors</h2>
-        <table id="contributors-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Contributors data will be dynamically inserted here -->
-            </tbody>
-        </table>
-    </section>
-    <section>
-        <h2>Expense Sheet</h2>
-        <table id="expenses-table">
-            <thead>
-                <tr>
-                    <th>Expense Name</th>
-                    <th>Amount (₹)</th>
-                    <th>Paid By</th>
-                    <th>Comments</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Expenses data will be dynamically inserted here -->
-            </tbody>
-        </table>
-    </section>
+    <header>Summary Page</header>
+    <main>
+        <section>
+            <h2>Contributors</h2>
+            <table id="contributors-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Contributors data will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h2>Expense Sheet</h2>
+            <div class="add-expense-form">
+                <input type="text" id="expense-name" placeholder="Expense Name" required>
+                <input type="number" id="expense-amount" placeholder="Amount (₹)" required>
+                <input type="text" id="expense-paidby" placeholder="Paid By" required>
+                <input type="text" id="expense-comments" placeholder="Comments">
+                <button id="add-expense-btn">Add Expense</button>
+            </div>
+            <table id="expenses-table">
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Amount (₹)</th>
+                        <th>Paid By</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Expenses data will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
     <script>
         const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
         const AZURE_CONTAINER_NAME = "tracker";
-        const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
-        const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
-
-        // DOM Elements
-        const contributorsTableBody = document.querySelector("#contributors-table tbody");
-        const expensesTableBody = document.querySelector("#expenses-table tbody");
-
-        // Fetch Data from Azure Blob
-        async function fetchData() {
-            try {
-                const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const data = await response.json();
-                return {
-                    contributors: data.contributors || [],
-                    expenses: data.expenses || [],
-                };
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                return { contributors: [], expenses: [] };
-            }
-        }
-
-        // Render Contributors
-        function renderContributors(contributors) {
-            contributorsTableBody.innerHTML = "";
-            contributors.forEach((contributor) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${contributor.name}</td>
-                    <td>₹${contributor.amount}</td>
-                `;
-                contributorsTableBody.appendChild(row);
-            });
-        }
-
-        // Render Expenses
-        function renderExpenses(expenses) {
-            expensesTableBody.innerHTML = "";
-            expenses.forEach((expense) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${expense.name}</td>
-                    <td>₹${expense.amount}</td>
-                    <td>${expense.paidBy}</td>
-                    <td>${expense.comments}</td>
-                `;
-                expensesTableBody.appendChild(row);
-            });
-        }
-
-        // Fetch and Render Data
-        async function fetchAndRender() {
-            try {
-                const { contributors, expenses } = await fetchData();
-                renderContributors(contributors);
-                renderExpenses(expenses);
-            } catch (error) {
-                console.error("Error rendering data:", error);
-            }
-        }
-
-        // Initialize
-        window.onload = fetchAndRender;
-    </script>
-</body>
-</html>
+        const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3
