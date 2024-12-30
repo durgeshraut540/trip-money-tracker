@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary</title>
     <style>
-        /* Your CSS styling here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Summary</h1>
+        <h1>Summary Page</h1>
     </header>
-    <div id="content">
+    <section>
         <h2>Contributors</h2>
         <table id="contributors-table">
             <thead>
@@ -21,51 +42,94 @@
                     <th>Amount</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <!-- Contributors data will be dynamically inserted here -->
+            </tbody>
         </table>
-        <h2>Expenses</h2>
+    </section>
+    <section>
+        <h2>Expense Sheet</h2>
         <table id="expenses-table">
             <thead>
                 <tr>
                     <th>Expense Name</th>
-                    <th>Amount</th>
+                    <th>Amount (₹)</th>
                     <th>Paid By</th>
                     <th>Comments</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <!-- Expenses data will be dynamically inserted here -->
+            </tbody>
         </table>
-    </div>
+    </section>
     <script>
         const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
         const AZURE_CONTAINER_NAME = "tracker";
         const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3KVwE9SnveqCG37i6kKHN809s2YqbLlSg5UNEhie%2F9c%3D";
         const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/data.json`;
 
-        const contributorsTable = document.querySelector("#contributors-table tbody");
-        const expensesTable = document.querySelector("#expenses-table tbody");
+        // DOM Elements
+        const contributorsTableBody = document.querySelector("#contributors-table tbody");
+        const expensesTableBody = document.querySelector("#expenses-table tbody");
 
-        async function fetchAndRender() {
+        // Fetch Data from Azure Blob
+        async function fetchData() {
             try {
                 const response = await fetch(`${BLOB_URL}?${SAS_TOKEN}`);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 const data = await response.json();
-
-                // Render contributors
-                contributorsTable.innerHTML = data.contributors.map(
-                    (c) => `<tr><td>${c.name}</td><td>${c.amount}</td></tr>`
-                ).join("");
-
-                // Render expenses
-                expensesTable.innerHTML = data.expenses.map(
-                    (e) => `<tr><td>${e.name}</td><td>${e.amount}</td><td>${e.paidBy}</td><td>${e.comments}</td></tr>`
-                ).join("");
+                return {
+                    contributors: data.contributors || [],
+                    expenses: data.expenses || [],
+                };
             } catch (error) {
                 console.error("Error fetching data:", error);
+                return { contributors: [], expenses: [] };
+            }
+        }
+
+        // Render Contributors
+        function renderContributors(contributors) {
+            contributorsTableBody.innerHTML = "";
+            contributors.forEach((contributor) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${contributor.name}</td>
+                    <td>₹${contributor.amount}</td>
+                `;
+                contributorsTableBody.appendChild(row);
+            });
+        }
+
+        // Render Expenses
+        function renderExpenses(expenses) {
+            expensesTableBody.innerHTML = "";
+            expenses.forEach((expense) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${expense.name}</td>
+                    <td>₹${expense.amount}</td>
+                    <td>${expense.paidBy}</td>
+                    <td>${expense.comments}</td>
+                `;
+                expensesTableBody.appendChild(row);
+            });
+        }
+
+        // Fetch and Render Data
+        async function fetchAndRender() {
+            try {
+                const { contributors, expenses } = await fetchData();
+                renderContributors(contributors);
+                renderExpenses(expenses);
+            } catch (error) {
+                console.error("Error rendering data:", error);
             }
         }
 
         // Initialize
-        fetchAndRender();
+        window.onload = fetchAndRender;
     </script>
 </body>
 </html>
