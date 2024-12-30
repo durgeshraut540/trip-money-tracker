@@ -4,114 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-
-        main {
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h2 {
-            color: #4CAF50;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .add-expense-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .add-expense-form input, .add-expense-form button {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .add-expense-form button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .add-expense-form button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>Summary Page</header>
-    <main>
-        <section>
-            <h2>Contributors</h2>
-            <table id="contributors-table">
+    <header class="header">
+        <h1 class="title">Trip Expense Tracker - Summary</h1>
+    </header>
+    <main class="container">
+        <!-- Contributors Section -->
+        <section id="contributors-section" class="section">
+            <h2 class="section-title">Contributors</h2>
+            <table id="contributors-table" class="styled-table">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Amount</th>
+                        <th>Amount Paid (₹)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Contributors data will be dynamically inserted here -->
+                    <!-- Rows will be dynamically added here -->
                 </tbody>
             </table>
         </section>
-        <section>
-            <h2>Expense Sheet</h2>
-            <div class="add-expense-form">
-                <input type="text" id="expense-name" placeholder="Expense Name" required>
-                <input type="number" id="expense-amount" placeholder="Amount (₹)" required>
-                <input type="text" id="expense-paidby" placeholder="Paid By" required>
-                <input type="text" id="expense-comments" placeholder="Comments">
-                <button id="add-expense-btn">Add Expense</button>
-            </div>
-            <table id="expenses-table">
+
+        <!-- Expenses Section -->
+        <section id="expenses-section" class="section">
+            <h2 class="section-title">Expense Sheet</h2>
+            <table id="expenses-table" class="styled-table">
                 <thead>
                     <tr>
                         <th>Expense Name</th>
@@ -121,12 +40,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Expenses data will be dynamically inserted here -->
+                    <!-- Rows will be dynamically added here -->
                 </tbody>
             </table>
         </section>
     </main>
-    <script>
-        const AZURE_STORAGE_ACCOUNT = "durgeshpocstorage";
-        const AZURE_CONTAINER_NAME = "tracker";
-        const SAS_TOKEN = "sp=racwdl&st=2024-12-28T06:15:39Z&se=2025-03-05T14:15:39Z&sv=2022-11-02&sr=c&sig=3
+    <footer class="footer">
+        <p>&copy; 2024 Trip Expense Tracker</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
