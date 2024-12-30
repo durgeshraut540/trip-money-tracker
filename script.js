@@ -7,6 +7,7 @@ const BLOB_URL = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE
 // DOM Elements
 const contributorsTable = document.querySelector("#contributors-table tbody");
 const expensesTable = document.querySelector("#expenses-table tbody");
+const addContributorBtn = document.querySelector("#add-contributor-btn");
 const addExpenseBtn = document.querySelector("#add-expense-btn");
 
 // Fetch data from Azure Blob Storage
@@ -83,6 +84,33 @@ async function renderExpenses() {
     }
 }
 
+// Add Contributor
+addContributorBtn.addEventListener("click", async () => {
+    const contributorName = document.querySelector("#contributor-name").value.trim();
+    const contributorAmount = parseFloat(document.querySelector("#contributor-amount").value);
+
+    if (!contributorName || isNaN(contributorAmount)) {
+        alert("Please fill out all required fields!");
+        return;
+    }
+
+    try {
+        const data = await fetchData();
+        const contributors = data.contributors || [];
+
+        contributors.push({
+            name: contributorName,
+            amount: contributorAmount,
+        });
+
+        await saveData({ ...data, contributors }); // Update Azure Blob Storage
+        alert("Contributor added successfully!");
+        renderContributors(); // Refresh the contributors table
+    } catch (error) {
+        console.error("Error adding contributor:", error);
+    }
+});
+
 // Add Expense
 addExpenseBtn.addEventListener("click", async () => {
     const expenseName = document.querySelector("#expense-name").value.trim();
@@ -116,4 +144,6 @@ addExpenseBtn.addEventListener("click", async () => {
 
 // Initialize Summary Page
 (async function initSummaryPage() {
-    await render
+    await renderContributors();
+    await renderExpenses();
+})();
